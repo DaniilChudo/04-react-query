@@ -14,6 +14,11 @@ import { fetchMovies } from "../../services/movieService";
 
 import css from "./App.module.css";
 
+// ВИПРАВЛЕННЯ ТУТ: Без any, чисто для TypeScript та ESLint
+const Paginate =
+  (ReactPaginate as unknown as { default: typeof ReactPaginate }).default ||
+  ReactPaginate;
+
 const App: FC = () => {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -32,10 +37,11 @@ const App: FC = () => {
 
   const handlePageChange = ({ selected }: { selected: number }) => {
     setPage(selected + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <>
+    <div className={css.appContainer}>
       <Toaster position="top-right" />
 
       <SearchBar onSubmit={handleSearch} />
@@ -45,8 +51,10 @@ const App: FC = () => {
 
         {isLoading && <Loader />}
 
-        {data && data.results.length === 0 && query !== "" && (
-          <p>No movies found for your query.</p>
+        {data && data.results.length === 0 && query !== "" && !isLoading && (
+          <p style={{ textAlign: "center", marginTop: "20px" }}>
+            No movies found for your query.
+          </p>
         )}
 
         {data && data.results.length > 0 && (
@@ -54,16 +62,16 @@ const App: FC = () => {
             <MovieGrid movies={data.results} onSelect={setSelectedMovie} />
 
             {data.total_pages > 1 && (
-              <ReactPaginate
-                pageCount={data.total_pages}
+              <Paginate
+                pageCount={data.total_pages > 500 ? 500 : data.total_pages}
                 pageRangeDisplayed={5}
                 marginPagesDisplayed={1}
                 onPageChange={handlePageChange}
                 forcePage={page - 1}
                 containerClassName={css.pagination}
                 activeClassName={css.active}
-                nextLabel=">"
-                previousLabel="<"
+                nextLabel="→"
+                previousLabel="←"
               />
             )}
           </>
@@ -76,7 +84,7 @@ const App: FC = () => {
           onClose={() => setSelectedMovie(null)}
         />
       )}
-    </>
+    </div>
   );
 };
 

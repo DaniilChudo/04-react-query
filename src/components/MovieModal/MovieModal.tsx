@@ -8,9 +8,9 @@ interface MovieModalProps {
   onClose: () => void;
 }
 
-const modalRoot = document.querySelector("#modal-root") as HTMLElement;
-
 const MovieModal = ({ movie, onClose }: MovieModalProps) => {
+  const modalRoot = document.querySelector("#modal-root");
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Escape") onClose();
@@ -22,6 +22,8 @@ const MovieModal = ({ movie, onClose }: MovieModalProps) => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose]);
+
+  if (!modalRoot) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
