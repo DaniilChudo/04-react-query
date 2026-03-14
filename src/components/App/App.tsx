@@ -1,5 +1,5 @@
-import { useState, type FC } from "react";
-import { Toaster } from "react-hot-toast";
+import { useState, useEffect, type FC } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
 
@@ -17,6 +17,7 @@ import {
 
 import css from "./App.module.css";
 
+// Безпечний імпорт для React 19 / TS
 const Paginate =
   (ReactPaginate as unknown as { default: typeof ReactPaginate }).default ||
   ReactPaginate;
@@ -30,9 +31,17 @@ const App: FC = () => {
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query.trim() !== "",
-
     placeholderData: keepPreviousData,
   });
+
+  // НОВЕ: Ефект для показу toast, якщо нічого не знайдено
+  useEffect(() => {
+    if (data && data.results.length === 0 && query !== "") {
+      toast.error("No movies found for your query.", {
+        id: "no-results", // щоб тости не дублювалися при кожному рендері
+      });
+    }
+  }, [data, query]);
 
   const handleSearch = (searchQuery: string) => {
     setQuery(searchQuery);
@@ -55,6 +64,7 @@ const App: FC = () => {
 
         {isLoading && <Loader />}
 
+        {/* Текст залишаємо (за бажанням), але головне — тепер працює toast через useEffect вище */}
         {data && data.results.length === 0 && query !== "" && !isLoading && (
           <p style={{ textAlign: "center", marginTop: "20px" }}>
             No movies found for your query.
