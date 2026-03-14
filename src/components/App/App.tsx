@@ -1,6 +1,6 @@
 import { useState, type FC } from "react";
 import { Toaster } from "react-hot-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
 
 import SearchBar from "../SearchBar/SearchBar";
@@ -9,12 +9,14 @@ import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieModal from "../MovieModal/MovieModal";
 
-import type { Movie, FetchMoviesResponse } from "../../types/movie";
-import { fetchMovies } from "../../services/movieService";
+import type { Movie } from "../../types/movie";
+import {
+  fetchMovies,
+  type FetchMoviesResponse,
+} from "../../services/movieService";
 
 import css from "./App.module.css";
 
-// ВИПРАВЛЕННЯ ТУТ: Без any, чисто для TypeScript та ESLint
 const Paginate =
   (ReactPaginate as unknown as { default: typeof ReactPaginate }).default ||
   ReactPaginate;
@@ -28,6 +30,8 @@ const App: FC = () => {
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query.trim() !== "",
+
+    placeholderData: keepPreviousData,
   });
 
   const handleSearch = (searchQuery: string) => {
